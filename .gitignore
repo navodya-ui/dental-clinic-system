@@ -1,0 +1,19 @@
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Maven
+target/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+*.iml
+.idea/
+
+# Credentials (never commit DB passwords)
+*.properties.local
