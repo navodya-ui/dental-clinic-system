@@ -50,7 +50,7 @@ public class SearchBillController {
         }
 
         try {
-            ApiClient.ApiResponse response = apiClient.post("/bills/" + lastSearchedAppointmentNo, new Object());
+            ApiClient.ApiResponse response = apiClient.post("/bills/" + lastSearchedAppointmentNo);
 
             if (response.isSuccess()) {
                 JsonNode json = apiClient.getMapper().readTree(response.body);

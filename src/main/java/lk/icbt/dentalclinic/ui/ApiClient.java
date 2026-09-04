@@ -46,6 +46,21 @@ public class ApiClient {
         return new ApiResponse(response.statusCode(), response.body());
     }
 
+    /**
+     * POST with no request body - for endpoints like /bills/{appointmentNo}
+     * where every parameter is already in the URL path.
+     */
+    public ApiResponse post(String path) throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + path))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        return new ApiResponse(response.statusCode(), response.body());
+    }
+
     public ApiResponse get(String path) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + path))

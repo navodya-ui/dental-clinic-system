@@ -1,0 +1,8 @@
+----- Sunrise Dental Clinic -----
+Bill No: 2
+Date: 2026-09-04
+Appointment No: APT0005
+Patient: tharani
+Treatment: Root Canal
+Total Amount: Rs. 8000.00
+----------------------------------
