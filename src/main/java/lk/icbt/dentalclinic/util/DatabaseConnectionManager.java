@@ -18,7 +18,7 @@ public class DatabaseConnectionManager {
     // private constructor -> prevents external instantiation
     private DatabaseConnectionManager() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://localhost:3306/dental_clinic_db");
+        config.setJdbcUrl("jdbc:mysql://localhost:3306/dental_clinic_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC");
         config.setUsername("root");           
         config.setPassword("37333733");  
         config.setMaximumPoolSize(10);

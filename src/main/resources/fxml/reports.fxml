@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="lk.icbt.dentalclinic.ui.ReportsController"
+      style="-fx-background-color: #F7F9FC;">
+    <padding>
+        <Insets top="20" bottom="20" left="24" right="24"/>
+    </padding>
+
+    <Label text="Reports" style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #1A2B4C;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Date:"/>
+        <DatePicker fx:id="reportDatePicker"/>
+        <Label text="Dentist ID (for schedule):"/>
+        <TextField fx:id="dentistIdField" prefWidth="60"/>
+        <Button text="Daily Appointments" onAction="#loadDailyReport"
+                style="-fx-background-color: #4B6FA5; -fx-text-fill: white;"/>
+        <Button text="Dentist Schedule" onAction="#loadDentistSchedule"
+                style="-fx-background-color: #2F7A5C; -fx-text-fill: white;"/>
+    </HBox>
+
+    <TableView fx:id="appointmentsTable" prefHeight="240">
+        <columns>
+            <TableColumn fx:id="colApptNo" text="Appt No" prefWidth="90"/>
+            <TableColumn fx:id="colTime" text="Time" prefWidth="70"/>
+            <TableColumn fx:id="colPatient" text="Patient" prefWidth="130"/>
+            <TableColumn fx:id="colContact" text="Contact" prefWidth="100"/>
+            <TableColumn fx:id="colDentist" text="Dentist" prefWidth="130"/>
+            <TableColumn fx:id="colTreatment" text="Treatment" prefWidth="130"/>
+            <TableColumn fx:id="colStatus" text="Status" prefWidth="90"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Revenue From:"/>
+        <DatePicker fx:id="revenueStartPicker"/>
+        <Label text="To:"/>
+        <DatePicker fx:id="revenueEndPicker"/>
+        <Button text="Revenue Summary" onAction="#loadRevenueSummary"
+                style="-fx-background-color: #7A4B96; -fx-text-fill: white;"/>
+        <Button text="Popular Treatments" onAction="#loadPopularTreatments"
+                style="-fx-background-color: #8A6D3B; -fx-text-fill: white;"/>
+    </HBox>
+
+    <Label fx:id="summaryLabel" wrapText="true" style="-fx-text-fill: #1A2B4C; -fx-font-weight: bold;"/>
+
+    <Button text="Back to Menu" onAction="#handleBack"/>
+</VBox>
