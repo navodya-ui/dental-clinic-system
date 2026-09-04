@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="10.0" xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="lk.icbt.dentalclinic.ui.RegisterAppointmentController"
+      style="-fx-background-color: #F7F9FC;">
+    <padding>
+        <Insets top="20" bottom="20" left="24" right="24"/>
+    </padding>
+
+    <Label text="Register New Appointment" style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #2F7A5C;"/>
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="Patient Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="nameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Address:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="addressField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Contact Number:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="contactField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Dentist ID:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="dentistIdField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Treatment ID:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="treatmentIdField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="Appointment Date:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="datePicker" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+        <Label text="Appointment Time (HH:mm):" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <TextField fx:id="timeField" promptText="e.g. 10:30" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Label fx:id="statusLabel" wrapText="true" style="-fx-text-fill: #A5544B;"/>
+
+    <Button text="Register Appointment" onAction="#handleRegister"
+            style="-fx-background-color: #4B6FA5; -fx-text-fill: white; -fx-font-weight: bold;"/>
+    <Button text="Back to Menu" onAction="#handleBack"/>
+</VBox>

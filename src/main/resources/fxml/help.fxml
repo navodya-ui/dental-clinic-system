@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="12.0" xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="lk.icbt.dentalclinic.ui.HelpController"
+      style="-fx-background-color: #FBF3E6;">
+    <padding>
+        <Insets top="20" bottom="20" left="24" right="24"/>
+    </padding>
+
+    <Label text="Help &amp; Instructions" style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #8A6D3B;"/>
+
+    <ScrollPane fitToWidth="true" prefHeight="360">
+        <Label wrapText="true" style="-fx-font-size: 13px;" text="1. LOGIN
+   Enter your staff username and password to access the system.
+
+2. REGISTER NEW APPOINTMENT
+   From the main menu, select 'Register New Appointment'. Fill in the
+   patient's name, address, contact number, choose the dentist and
+   treatment by their ID, and select a date and time. All fields are
+   validated before submission.
+
+3. SEARCH APPOINTMENT / GENERATE BILL
+   Enter the appointment number (e.g. APT0001) and click Search to
+   view full details. Click 'Generate Bill' to calculate the total
+   cost based on the treatment's consultation fee, then 'Print Receipt'
+   to save a copy of the receipt.
+
+4. EXIT
+   Use the Exit button on the main menu to safely close the application."/>
+    </ScrollPane>
+
+    <Button text="Back to Menu" onAction="#handleBack"/>
+</VBox>

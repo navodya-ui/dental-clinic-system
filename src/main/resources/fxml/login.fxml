@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="14.0" xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="lk.icbt.dentalclinic.ui.LoginController"
+      style="-fx-background-color: #EFF2FB;">
+    <padding>
+        <Insets top="40" bottom="40" left="40" right="40"/>
+    </padding>
+
+    <Label text="Sunrise Dental Clinic" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1A2B4C;"/>
+    <Label text="Staff Login" style="-fx-font-size: 13px; -fx-text-fill: #4B6FA5;"/>
+
+    <TextField fx:id="usernameField" promptText="Username" maxWidth="260"/>
+    <PasswordField fx:id="passwordField" promptText="Password" maxWidth="260"/>
+
+    <Button text="Login" onAction="#handleLogin" defaultButton="true"
+            style="-fx-background-color: #2F7A5C; -fx-text-fill: white; -fx-font-weight: bold;"
+            prefWidth="140"/>
+
+    <Label fx:id="statusLabel" style="-fx-text-fill: #A5544B;"/>
+</VBox>
