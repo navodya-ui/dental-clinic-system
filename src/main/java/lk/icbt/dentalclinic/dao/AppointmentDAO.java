@@ -28,9 +28,11 @@ public class AppointmentDAO {
     /**
      * Inserts a new appointment along with its related patient record.
      * Assumes dentist_id and treatment_id already exist (chosen from a dropdown in the UI).
-     * Returns true if the insert succeeded.
+     * Throws a DataAccessException (unchecked) with the real database message on failure,
+     * instead of silently returning false - this lets the UI show the actual cause
+     * (e.g. "unknown treatment_id") rather than a generic error.
      */
-    public boolean addAppointment(Appointment appointment) {
+    public void addAppointment(Appointment appointment) {
         String insertPatientSql =
                 "INSERT INTO patients (name, address, contact_number) VALUES (?, ?, ?)";
         String insertAppointmentSql =
@@ -79,7 +81,6 @@ public class AppointmentDAO {
             }
 
             conn.commit();
-            return true;
 
         } catch (SQLException e) {
             if (conn != null) {
@@ -90,7 +91,7 @@ public class AppointmentDAO {
                 }
             }
             e.printStackTrace();
-            return false;
+            throw new DataAccessException("Database error: " + e.getMessage(), e);
         } finally {
             if (conn != null) {
                 try {

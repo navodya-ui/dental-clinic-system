@@ -58,10 +58,7 @@ public class AppointmentService {
             throw new IllegalArgumentException("Invalid appointment details - please check the date/time and required fields.");
         }
 
-        boolean saved = appointmentDAO.addAppointment(appointment);
-        if (!saved) {
-            throw new RuntimeException("Failed to save appointment to the database.");
-        }
+        appointmentDAO.addAppointment(appointment);
 
         notifyAppointmentRegistered(appointment);
         return appointment;
