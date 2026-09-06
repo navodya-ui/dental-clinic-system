@@ -21,6 +21,15 @@ public class BillService {
         this.billDAO = new BillDAO();
     }
 
+    /**
+     * Constructor overload allowing a DAO to be injected - used by unit tests
+     * (with a Mockito mock) so business logic can be tested without a live
+     * database connection. Production code uses the no-arg constructor above.
+     */
+    public BillService(BillDAO billDAO) {
+        this.billDAO = billDAO;
+    }
+
     public void registerObserver(AppointmentObserver observer) {
         observers.add(observer);
     }

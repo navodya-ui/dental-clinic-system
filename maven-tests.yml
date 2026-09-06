@@ -1,0 +1,37 @@
+name: Run Unit Tests
+
+# Test automation: runs the full JUnit unit test suite automatically
+# on every push and pull request against main, without any manual
+# step. Integration tests (AppointmentDAOIntegrationTest) are excluded
+# since this runner has no access to a local MySQL instance - only
+# the mocked unit tests (model + service layer) run here.
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run unit tests with Maven
+        run: mvn -B test -Dtest='!*IntegrationTest'
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-test-reports
+          path: target/surefire-reports/

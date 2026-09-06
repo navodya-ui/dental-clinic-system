@@ -30,6 +30,15 @@ public class AppointmentService {
         this.appointmentDAO = new AppointmentDAO();
     }
 
+    /**
+     * Constructor overload allowing a DAO to be injected - used by unit tests
+     * (with a Mockito mock) so business logic can be tested without a live
+     * database connection. Production code uses the no-arg constructor above.
+     */
+    public AppointmentService(AppointmentDAO appointmentDAO) {
+        this.appointmentDAO = appointmentDAO;
+    }
+
     public void registerObserver(AppointmentObserver observer) {
         observers.add(observer);
     }
