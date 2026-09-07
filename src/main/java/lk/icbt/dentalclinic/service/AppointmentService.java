@@ -61,9 +61,10 @@ public class AppointmentService {
     public Appointment registerAppointment(Patient patient, Dentist dentist, Treatment treatment,
                                             LocalDate date, LocalTime time) {
 
-        // Validate first, with a placeholder number, before touching the database
-        // at all - avoids an unnecessary DB round-trip for an appointment that's
-        // going to be rejected anyway.
+        // Built with a null appointment number - AppointmentDAO.addAppointment()
+        // derives and assigns the real "APTnnnn" number atomically from the
+        // database's own AUTO_INCREMENT id once the row is inserted, avoiding
+        // any application-level race condition on the number itself.
         Appointment appointment = AppointmentFactory.createAppointment(
                 null, patient, dentist, treatment, date, time);
 
@@ -71,10 +72,7 @@ public class AppointmentService {
             throw new IllegalArgumentException("Invalid appointment details - please check the date/time and required fields.");
         }
 
-        String appointmentNo = appointmentDAO.getNextAppointmentNo();
-        appointment.setAppointmentNo(appointmentNo);
-
-        appointmentDAO.addAppointment(appointment);
+        appointmentDAO.addAppointment(appointment); // mutates appointment: sets id + appointment number
 
         notifyAppointmentRegistered(appointment);
         return appointment;

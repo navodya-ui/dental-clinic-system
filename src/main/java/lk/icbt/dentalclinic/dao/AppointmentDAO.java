@@ -26,38 +26,25 @@ public class AppointmentDAO {
     }
 
     /**
-     * Returns the next sequential appointment number by checking the highest
-     * existing appointment_no in the database (e.g. APT0007 -> APT0008).
-     * This replaces an earlier in-memory counter that reset to APT0001 on
-     * every server restart and caused duplicate-key failures once real data
-     * existed - always deriving the number from the database instead avoids
-     * that entirely.
-     */
-    public synchronized String getNextAppointmentNo() {
-        String sql = "SELECT appointment_no FROM appointments ORDER BY appointment_id DESC LIMIT 1";
-
-        try (Connection conn = connectionManager.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-
-            if (rs.next()) {
-                String lastNo = rs.getString("appointment_no"); // e.g. "APT0007"
-                int lastNumber = Integer.parseInt(lastNo.replaceAll("\\D", ""));
-                return String.format("APT%04d", lastNumber + 1);
-            } else {
-                return "APT0001"; // first appointment ever
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Failed to generate next appointment number: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Inserts a new appointment along with its related patient record.
-     * Assumes dentist_id and treatment_id already exist (chosen from a dropdown in the UI).
-     * Throws a DataAccessException (unchecked) with the real database message on failure,
-     * instead of silently returning false - this lets the UI show the actual cause
-     * (e.g. "unknown treatment_id") rather than a generic error.
+     * Inserts a new appointment along with its related patient record, and
+     * derives the appointment number from the database's own AUTO_INCREMENT
+     * appointment_id - inserted with a temporary placeholder number first
+     * (to satisfy the NOT NULL/UNIQUE constraint), then immediately updated
+     * to the final "APTnnnn" value once the real id is known, all within
+     * the same transaction.
+     *
+     * This replaces an earlier approach that queried MAX(appointment_no)
+     * as a separate step before inserting: under concurrent requests (e.g.
+     * a fast double-click, or two staff registering appointments at the
+     * same moment), two requests could read the same "next number" before
+     * either committed, causing a duplicate-key failure. AUTO_INCREMENT
+     * allocation is atomic at the database level, so deriving the number
+     * from it instead removes the race condition entirely - no
+     * application-level locking is needed.
+     *
+     * Throws a DataAccessException (unchecked) with the real database message
+     * on failure, instead of silently returning false - this lets the UI show
+     * the actual cause (e.g. "unknown treatment_id") rather than a generic error.
      */
     public void addAppointment(Appointment appointment) {
         String insertPatientSql =
@@ -65,6 +52,8 @@ public class AppointmentDAO {
         String insertAppointmentSql =
                 "INSERT INTO appointments (appointment_no, appointment_date, appointment_time, "
               + "status, patient_id, dentist_id, treatment_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String updateAppointmentNoSql =
+                "UPDATE appointments SET appointment_no = ? WHERE appointment_id = ?";
 
         Connection conn = null;
         try {
@@ -89,9 +78,14 @@ public class AppointmentDAO {
                 }
             }
 
+            // Temporary placeholder - guaranteed unique because it embeds nanoTime().
+            // Overwritten with the real "APTnnnn" number two statements below.
+            String placeholderNo = "TMP-" + System.nanoTime();
+            int generatedAppointmentId;
+
             try (PreparedStatement psAppt = conn.prepareStatement(insertAppointmentSql,
                     Statement.RETURN_GENERATED_KEYS)) {
-                psAppt.setString(1, appointment.getAppointmentNo());
+                psAppt.setString(1, placeholderNo);
                 psAppt.setDate(2, Date.valueOf(appointment.getAppointmentDate()));
                 psAppt.setTime(3, Time.valueOf(appointment.getAppointmentTime()));
                 psAppt.setString(4, appointment.getStatus().name());
@@ -102,10 +96,21 @@ public class AppointmentDAO {
 
                 try (ResultSet keys = psAppt.getGeneratedKeys()) {
                     if (keys.next()) {
-                        appointment.setAppointmentId(keys.getInt(1));
+                        generatedAppointmentId = keys.getInt(1);
+                        appointment.setAppointmentId(generatedAppointmentId);
+                    } else {
+                        throw new SQLException("Failed to obtain generated appointment_id");
                     }
                 }
             }
+
+            String finalAppointmentNo = String.format("APT%04d", generatedAppointmentId);
+            try (PreparedStatement psUpdate = conn.prepareStatement(updateAppointmentNoSql)) {
+                psUpdate.setString(1, finalAppointmentNo);
+                psUpdate.setInt(2, generatedAppointmentId);
+                psUpdate.executeUpdate();
+            }
+            appointment.setAppointmentNo(finalAppointmentNo);
 
             conn.commit();
 

@@ -7,6 +7,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -20,15 +21,21 @@ public class RegisterAppointmentController {
     @FXML private ComboBox<Option> dentistComboBox;
     @FXML private ComboBox<Option> treatmentComboBox;
     @FXML private DatePicker datePicker;
-    @FXML private TextField timeField;
+    @FXML private ComboBox<LocalTime> timeComboBox;
     @FXML private Label statusLabel;
 
     private final ApiClient apiClient = new ApiClient();
+    private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("hh:mm a");
+
+    // Clinic hours: 9:00 AM to 5:00 PM, in 30-minute slots.
+    private static final LocalTime CLINIC_OPEN = LocalTime.of(9, 0);
+    private static final LocalTime CLINIC_CLOSE = LocalTime.of(17, 0);
 
     @FXML
     public void initialize() {
         loadDentists();
         loadTreatments();
+        loadTimeSlots();
     }
 
     /**
@@ -73,6 +80,34 @@ public class RegisterAppointmentController {
         }
     }
 
+    /**
+     * Populates the time dropdown with fixed 30-minute slots within clinic
+     * hours (9:00 AM - 5:00 PM), replacing free-text time entry entirely -
+     * staff select a slot instead of typing "HH:mm" by hand, which also
+     * removes an entire category of invalid input (typos, bad formats,
+     * out-of-hours times) at the source.
+     */
+    private void loadTimeSlots() {
+        var slots = FXCollections.<LocalTime>observableArrayList();
+        LocalTime current = CLINIC_OPEN;
+        while (!current.isAfter(CLINIC_CLOSE.minusMinutes(30))) {
+            slots.add(current);
+            current = current.plusMinutes(30);
+        }
+        timeComboBox.setItems(slots);
+        timeComboBox.setConverter(new StringConverter<LocalTime>() {
+            @Override
+            public String toString(LocalTime time) {
+                return time == null ? "" : time.format(DISPLAY_FORMAT);
+            }
+
+            @Override
+            public LocalTime fromString(String string) {
+                return LocalTime.parse(string, DISPLAY_FORMAT);
+            }
+        });
+    }
+
     @FXML
     private void handleRegister() {
         String validationError = validateInputs();
@@ -90,8 +125,7 @@ public class RegisterAppointmentController {
             body.dentistId = dentistComboBox.getValue().id;
             body.treatmentId = treatmentComboBox.getValue().id;
             body.appointmentDate = datePicker.getValue().toString();
-            body.appointmentTime = LocalTime.parse(timeField.getText().trim(),
-                    DateTimeFormatter.ofPattern("HH:mm")).toString();
+            body.appointmentTime = timeComboBox.getValue().toString();
 
             ApiClient.ApiResponse response = apiClient.post("/appointments", body);
 
@@ -125,11 +159,7 @@ public class RegisterAppointmentController {
         if (treatmentComboBox.getValue() == null) return "Please select a treatment.";
         if (datePicker.getValue() == null) return "Please select an appointment date.";
         if (datePicker.getValue().isBefore(LocalDate.now())) return "Appointment date cannot be in the past.";
-        try {
-            LocalTime.parse(timeField.getText().trim(), DateTimeFormatter.ofPattern("HH:mm"));
-        } catch (Exception e) {
-            return "Time must be in HH:mm format (e.g. 10:30).";
-        }
+        if (timeComboBox.getValue() == null) return "Please select an appointment time.";
         return null;
     }
 
@@ -140,7 +170,7 @@ public class RegisterAppointmentController {
         dentistComboBox.setValue(null);
         treatmentComboBox.setValue(null);
         datePicker.setValue(null);
-        timeField.clear();
+        timeComboBox.setValue(null);
     }
 
     @FXML

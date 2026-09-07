@@ -38,8 +38,8 @@
         <Label text="Appointment Date:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
         <DatePicker fx:id="datePicker" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-        <Label text="Appointment Time (HH:mm):" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-        <TextField fx:id="timeField" promptText="e.g. 10:30" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+        <Label text="Appointment Time:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="timeComboBox" prefWidth="240" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
     </GridPane>
 
     <Label fx:id="statusLabel" wrapText="true" style="-fx-text-fill: #A5544B;"/>
