@@ -26,6 +26,33 @@ public class AppointmentDAO {
     }
 
     /**
+     * Returns the next sequential appointment number by checking the highest
+     * existing appointment_no in the database (e.g. APT0007 -> APT0008).
+     * This replaces an earlier in-memory counter that reset to APT0001 on
+     * every server restart and caused duplicate-key failures once real data
+     * existed - always deriving the number from the database instead avoids
+     * that entirely.
+     */
+    public synchronized String getNextAppointmentNo() {
+        String sql = "SELECT appointment_no FROM appointments ORDER BY appointment_id DESC LIMIT 1";
+
+        try (Connection conn = connectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                String lastNo = rs.getString("appointment_no"); // e.g. "APT0007"
+                int lastNumber = Integer.parseInt(lastNo.replaceAll("\\D", ""));
+                return String.format("APT%04d", lastNumber + 1);
+            } else {
+                return "APT0001"; // first appointment ever
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed to generate next appointment number: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * Inserts a new appointment along with its related patient record.
      * Assumes dentist_id and treatment_id already exist (chosen from a dropdown in the UI).
      * Throws a DataAccessException (unchecked) with the real database message on failure,

@@ -2,6 +2,7 @@ package lk.icbt.dentalclinic.dao;
 
 import lk.icbt.dentalclinic.model.User;
 import lk.icbt.dentalclinic.util.DatabaseConnectionManager;
+import lk.icbt.dentalclinic.util.PasswordUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,34 +18,36 @@ public class UserDAO {
     }
 
     /**
-     * Looks up a user by username/password for login.
-     * NOTE: the seed data in schema.sql stores plain-text passwords for
-     * simplicity during development. Before submission, switch this to
-     * compare hashed passwords (e.g. BCrypt) - worth a sentence in your
-     * report under "ethical/secure coding practice".
+     * Looks up a user by username, then compares the SHA-256 hash of the
+     * supplied password against the stored hash (via PasswordUtil) rather
+     * than comparing plain text in SQL. The plain-text password never
+     * touches the database in this method - only its hash does.
      */
-    public User findByCredentials(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+    public User findByCredentials(String username, String plainTextPassword) {
+        String sql = "SELECT * FROM users WHERE username = ?";
 
         try (Connection conn = connectionManager.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, username);
-            ps.setString(2, password);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new User(
-                            rs.getInt("user_id"),
-                            rs.getString("username"),
-                            rs.getString("password"),
-                            User.Role.valueOf(rs.getString("role"))
-                    );
+                    String storedHash = rs.getString("password");
+
+                    if (PasswordUtil.matches(plainTextPassword, storedHash)) {
+                        return new User(
+                                rs.getInt("user_id"),
+                                rs.getString("username"),
+                                storedHash,
+                                User.Role.valueOf(rs.getString("role"))
+                        );
+                    }
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return null; // either username not found, or password did not match
     }
 }

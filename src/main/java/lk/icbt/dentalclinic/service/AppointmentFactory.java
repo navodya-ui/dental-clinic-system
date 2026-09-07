@@ -7,28 +7,20 @@ import lk.icbt.dentalclinic.model.Treatment;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Factory pattern: centralizes the logic for constructing a new
- * Appointment (including generating its business-facing appointment
- * number), so the UI/controller layer never has to know those rules.
- * If a second appointment "type" were ever needed (e.g. emergency vs
- * routine), this is also the natural extension point.
+ * Appointment object, so the UI/controller layer never has to know
+ * the construction rules. The appointment number itself is generated
+ * by AppointmentDAO.getNextAppointmentNo() (derived from the database)
+ * and passed in here, rather than kept as in-memory state in this
+ * factory - an in-memory counter would reset to APT0001 on every
+ * server restart and collide with existing records.
  */
 public class AppointmentFactory {
 
-    // simple in-memory counter for demo purposes; in production this
-    // would be derived from the database (MAX(appointment_id) + 1)
-    private static final AtomicInteger sequence = new AtomicInteger(1);
-
-    public static Appointment createAppointment(Patient patient, Dentist dentist, Treatment treatment,
-                                                  LocalDate date, LocalTime time) {
-        String appointmentNo = generateAppointmentNo();
+    public static Appointment createAppointment(String appointmentNo, Patient patient, Dentist dentist,
+                                                  Treatment treatment, LocalDate date, LocalTime time) {
         return new Appointment(appointmentNo, date, time, patient, dentist, treatment);
-    }
-
-    private static String generateAppointmentNo() {
-        return String.format("APT%04d", sequence.getAndIncrement());
     }
 }

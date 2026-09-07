@@ -54,11 +54,13 @@ class AppointmentServiceTest {
         LocalTime time = LocalTime.of(10, 30);
 
         doNothing().when(appointmentDAO).addAppointment(any(Appointment.class));
+        when(appointmentDAO.getNextAppointmentNo()).thenReturn("APT0001");
 
         Appointment result = appointmentService.registerAppointment(patient, dentist, treatment, date, time);
 
         assertNotNull(result);
         assertEquals(patient, result.getPatient());
+        assertEquals("APT0001", result.getAppointmentNo());
         verify(appointmentDAO, times(1)).addAppointment(any(Appointment.class));
     }
 
@@ -78,6 +80,7 @@ class AppointmentServiceTest {
     @DisplayName("registerAppointment() propagates the real database error message on save failure")
     void registerAppointment_daoThrows_propagatesMessage() {
         LocalDate date = LocalDate.now().plusDays(1);
+        when(appointmentDAO.getNextAppointmentNo()).thenReturn("APT0002");
         doThrow(new DataAccessException("Database error: unknown treatment_id", null))
                 .when(appointmentDAO).addAppointment(any(Appointment.class));
 
@@ -97,6 +100,7 @@ class AppointmentServiceTest {
         appointmentService.registerObserver(observer2);
 
         doNothing().when(appointmentDAO).addAppointment(any(Appointment.class));
+        when(appointmentDAO.getNextAppointmentNo()).thenReturn("APT0003");
 
         appointmentService.registerAppointment(patient, dentist, treatment, date, LocalTime.of(10, 0));
 

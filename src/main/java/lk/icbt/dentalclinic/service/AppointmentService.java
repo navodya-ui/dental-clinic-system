@@ -61,11 +61,18 @@ public class AppointmentService {
     public Appointment registerAppointment(Patient patient, Dentist dentist, Treatment treatment,
                                             LocalDate date, LocalTime time) {
 
-        Appointment appointment = AppointmentFactory.createAppointment(patient, dentist, treatment, date, time);
+        // Validate first, with a placeholder number, before touching the database
+        // at all - avoids an unnecessary DB round-trip for an appointment that's
+        // going to be rejected anyway.
+        Appointment appointment = AppointmentFactory.createAppointment(
+                null, patient, dentist, treatment, date, time);
 
         if (!appointment.validateAppointment()) {
             throw new IllegalArgumentException("Invalid appointment details - please check the date/time and required fields.");
         }
+
+        String appointmentNo = appointmentDAO.getNextAppointmentNo();
+        appointment.setAppointmentNo(appointmentNo);
 
         appointmentDAO.addAppointment(appointment);
 

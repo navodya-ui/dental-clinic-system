@@ -15,23 +15,26 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the Factory Method pattern implementation.
+ * Note: the appointment number is now supplied by the caller (derived from
+ * the database via AppointmentDAO.getNextAppointmentNo()) rather than
+ * generated internally - this avoids the numbering-collision bug an
+ * in-memory counter caused on server restart. These tests confirm the
+ * Factory correctly assembles an Appointment from the given inputs.
  */
 @DisplayName("AppointmentFactory")
 class AppointmentFactoryTest {
 
     @Test
-    @DisplayName("createAppointment() generates an appointment number matching the APTnnnn format")
-    void createAppointment_generatesFormattedNumber() {
+    @DisplayName("createAppointment() assigns the supplied appointment number unchanged")
+    void createAppointment_usesSuppliedNumber() {
         Patient patient = new Patient("Test Patient", "Colombo", "0770000000");
         Dentist dentist = new Dentist(1, "Nimal Perera", "General Dentistry");
         Treatment treatment = new Treatment(1, "General Checkup", new BigDecimal("1500.00"));
 
         Appointment appointment = AppointmentFactory.createAppointment(
-                patient, dentist, treatment, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+                "APT0042", patient, dentist, treatment, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
 
-        assertNotNull(appointment.getAppointmentNo());
-        assertTrue(appointment.getAppointmentNo().matches("APT\\d{4}"),
-                "Expected format APTnnnn but was: " + appointment.getAppointmentNo());
+        assertEquals("APT0042", appointment.getAppointmentNo());
     }
 
     @Test
@@ -43,7 +46,8 @@ class AppointmentFactoryTest {
         LocalDate date = LocalDate.now().plusDays(3);
         LocalTime time = LocalTime.of(15, 30);
 
-        Appointment appointment = AppointmentFactory.createAppointment(patient, dentist, treatment, date, time);
+        Appointment appointment = AppointmentFactory.createAppointment(
+                "APT0043", patient, dentist, treatment, date, time);
 
         assertEquals(patient, appointment.getPatient());
         assertEquals(dentist, appointment.getDentist());
@@ -54,16 +58,16 @@ class AppointmentFactoryTest {
     }
 
     @Test
-    @DisplayName("createAppointment() produces unique, incrementing appointment numbers")
-    void createAppointment_generatesUniqueNumbers() {
+    @DisplayName("createAppointment() with two different numbers produces two distinct appointments")
+    void createAppointment_differentNumbers_areDistinct() {
         Patient patient = new Patient("Test Patient", "Colombo", "0770000000");
         Dentist dentist = new Dentist(1, "Nimal Perera", "General Dentistry");
         Treatment treatment = new Treatment(1, "General Checkup", new BigDecimal("1500.00"));
 
         Appointment first = AppointmentFactory.createAppointment(
-                patient, dentist, treatment, LocalDate.now().plusDays(1), LocalTime.of(9, 0));
+                "APT0044", patient, dentist, treatment, LocalDate.now().plusDays(1), LocalTime.of(9, 0));
         Appointment second = AppointmentFactory.createAppointment(
-                patient, dentist, treatment, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+                "APT0045", patient, dentist, treatment, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
 
         assertNotEquals(first.getAppointmentNo(), second.getAppointmentNo());
     }
